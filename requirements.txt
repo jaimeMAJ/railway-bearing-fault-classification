@@ -1,4 +1,4 @@
-﻿numpy
+numpy
 scipy
 pandas
 scikit-learn
@@ -6,3 +6,4 @@ matplotlib
 seaborn
 jupyter
 ipykernel
+pyarrow

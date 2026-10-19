@@ -1,0 +1,13 @@
+arquivo,classe_real,classe_predita,concordancia_votos,acertou,total_janelas
+B014_0.mat,B,B,0.9491525423728814,True,59
+B014_3.mat,B,B,0.9830508474576272,True,59
+B021_2.mat,B,B,0.9830508474576272,True,59
+IR007_2.mat,IR,IR,1.0,True,59
+IR014_1.mat,IR,IR,1.0,True,59
+IR014_3.mat,IR,IR,0.9830508474576272,True,59
+IR021_3.mat,IR,IR,1.0,True,59
+Normal_3.mat,Normal,Normal,1.0,True,237
+OR007@6_0.mat,OR,OR,1.0,True,59
+OR007@6_2.mat,OR,OR,1.0,True,59
+OR021@6_0.mat,OR,OR,1.0,True,59
+OR021@6_3.mat,OR,OR,1.0,True,59

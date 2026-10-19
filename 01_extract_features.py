@@ -1,114 +1,109 @@
-## Importando bibliotecas necessárias
-import numpy as np
-import pandas as pd
+"""
+01_extract_features.py
+
+Pipeline completo de ingestão de dados brutos (.mat do CWRU), segmentação em janelas,
+extração de características estatísticas (tempo e frequência/envelope), validação de qualidade
+de dados e persistência na Feature Store (.parquet e .csv).
+
+Conforme as Etapas 1 e 2 das especificações do TCC.
+"""
+
+import os
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.io import loadmat
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from src.preprocessing import (
-    montar_dataframe_bruto, segmentar_sinal, montar_dataframe_janelas, carregar_rpm, preencher_rpm_ausente
+
+from src.config import (
+    FIGURES_DIR,
+    PROCESSED_DATA_DIR,
+    RAW_DATA_DIR,
+    RESULTS_DIR,
+    TAMANHO_JANELA_PADRAO,
 )
-from src.features import montar_dataframe_features, calcular_frequencias_falha
-import os
-from scipy.stats import kurtosis
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-
-os.makedirs("results", exist_ok=True)
-
-# Primeiros teste carregando o arquivo .mat
-
-dados = loadmat("data/raw/Normal_0.mat")
-print(dados.keys())
-
-sinal = dados['X097_DE_time']
-print("Formato (shape):", sinal.shape)
-print("Primeiros 10 valores:", sinal[:10])
+from src.features import montar_dataframe_features, validar_qualidade_features
+from src.preprocessing import (
+    montar_dataframe_bruto,
+    montar_dataframe_janelas,
+    preencher_rpm_ausente,
+)
 
 
-# Visualizando o sinal de vibração para entender o comportamento, comparando com o sinal de falha
+def main():
+    print("=" * 70)
+    print("PIPELINE DE ENGENHARIA DE DADOS E EXTRAÇÃO DE ATRIBUTOS (CWRU)")
+    print("=" * 70)
 
-dados_falha = loadmat("data/raw/IR021_0.mat")
-print(dados_falha.keys())
+    # 1. Criação de diretórios estruturados
+    os.makedirs(PROCESSED_DATA_DIR, exist_ok=True)
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    os.makedirs(FIGURES_DIR, exist_ok=True)
 
-sinal_falha = dados_falha['X209_DE_time']
+    # 2. Ingestão e montagem do DataFrame bruto
+    print(f"\n[1/5] Ingerindo arquivos .mat de: {RAW_DATA_DIR}")
+    df_bruto = montar_dataframe_bruto(str(RAW_DATA_DIR))
+    print(f"      Total de arquivos lidos: {len(df_bruto)}")
+    print("      Distribuição de ensaios por classe:")
+    for classe, count in df_bruto["classe"].value_counts().items():
+        print(f"        - {classe}: {count} arquivos")
 
-fig, axs = plt.subplots(1, 2, figsize=(14, 4))
+    # 3. Tratamento de RPM ausente (imputação com base na carga do motor)
+    print("\n[2/5] Validando RPM e aplicando imputação por carga...")
+    df_bruto = preencher_rpm_ausente(df_bruto)
 
-axs[0].plot(sinal[:2000])
-axs[0].set_title("Saudável (Normal_0)")
-axs[0].set_ylabel("Aceleração")
+    # 4. Segmentação em janelas temporais discretas (com data lineage)
+    print(f"\n[3/5] Segmentando séries temporais em janelas de N = {TAMANHO_JANELA_PADRAO} pontos...")
+    df_janelas = montar_dataframe_janelas(
+        df_bruto,
+        tamanho_janela=TAMANHO_JANELA_PADRAO,
+        overlap=0.0,
+    )
+    print(f"      Total de janelas geradas: {len(df_janelas)}")
+    print("      Janelas por classe:")
+    for classe, count in df_janelas["classe"].value_counts().items():
+        print(f"        - {classe}: {count} janelas")
 
-axs[1].plot(sinal_falha[:2000])
-axs[1].set_title("Falha - Pista Interna 0.021\" (IR021_0)")
+    # 5. Extração de características (Tempo + FFT/Envelope)
+    print("\n[4/5] Extraindo atributos nos domínios do tempo e da frequência...")
+    df_features = montar_dataframe_features(df_janelas)
+    print(f"      Shape da Feature Store: {df_features.shape}")
 
-plt.tight_layout()
-plt.savefig("results/comparando_sinais.png", dpi=150, bbox_inches="tight")
-plt.close()
+    # 6. Validação de qualidade de dados (Data Quality Contract)
+    print("\n[5/5] Executando testes automatizados de qualidade de dados...")
+    validar_qualidade_features(df_features)
 
-def encontrar_chave_de_time(dados: dict) -> str:
-    for chave in dados.keys():
-        if "DE_time" in chave:
-            return chave
-    raise ValueError("Nenhuma chave DE_time encontrada no arquivo.")
+    # 7. Persistência dos dados (Parquet + CSV)
+    caminho_parquet = PROCESSED_DATA_DIR / "features.parquet"
+    caminho_csv = PROCESSED_DATA_DIR / "features.csv"
 
-# Testando:
-chave = encontrar_chave_de_time(dados_falha)
-print("Chave encontrada:", chave)
+    print(f"\nSalvando Feature Store em:\n  -> {caminho_parquet}\n  -> {caminho_csv}")
+    df_features.to_parquet(caminho_parquet, index=False)
+    df_features.to_csv(caminho_csv, index=False)
 
-# Montar Dataframe bruto com os sinais de vibração
+    # 8. Gráficos de exploração de atributos para a monografia
+    print("\nGerando gráficos de análise exploratória em results/figures...")
+    sns.set_theme(style="whitegrid")
 
-pasta = "data/raw"
-arquivos_com_erro = []
+    features_para_plot = [
+        ("rms", "Valor Eficaz (RMS) [g]", "boxplot_rms.png"),
+        ("curtose", "Curtose", "boxplot_curtose.png"),
+        ("fator_crista", "Fator de Crista", "boxplot_fator_crista.png"),
+        ("energia_bpfo", "Energia Espectral BPFO (Envelope)", "boxplot_energia_bpfo.png"),
+        ("energia_bpfi", "Energia Espectral BPFI (Envelope)", "boxplot_energia_bpfi.png"),
+        ("energia_bsf", "Energia Espectral BSF (Envelope)", "boxplot_energia_bsf.png"),
+    ]
 
-for nome_arquivo in sorted(os.listdir(pasta)):
-    if not nome_arquivo.endswith(".mat"):
-        continue
-    caminho = os.path.join(pasta, nome_arquivo)
-    try:
-        loadmat(caminho)
-    except Exception as e:
-        print(f"[CORROMPIDO] {nome_arquivo}: {e}")
-        arquivos_com_erro.append(nome_arquivo)
+    for col, rotulo_y, nome_arq in features_para_plot:
+        plt.figure(figsize=(7, 4.5))
+        sns.boxplot(data=df_features, x="classe", y=col, hue="classe", legend=False, palette="Blues")
+        plt.xlabel("Condição do Rolamento", fontsize=11, fontweight="bold")
+        plt.ylabel(rotulo_y, fontsize=11, fontweight="bold")
+        plt.title(f"Distribuição de {rotulo_y} por Condição", fontsize=12, fontweight="bold")
+        plt.tight_layout()
+        plt.savefig(FIGURES_DIR / nome_arq, dpi=300, bbox_inches="tight")
+        plt.savefig(RESULTS_DIR / nome_arq, dpi=150, bbox_inches="tight")  # compatibilidade
+        plt.close()
 
-print("\nTotal de arquivos com problema:", len(arquivos_com_erro))
-print(arquivos_com_erro)
-
-df = montar_dataframe_bruto("data/raw")
-df = preencher_rpm_ausente(df)
-print("Shape:", df.shape)
-print(df[["arquivo", "classe", "carga", "rpm"]].to_string())
-
-print(df["classe"].value_counts())
-print("\nn_amostras - mínimo, máximo, média:")
-print(df["n_amostras"].min(), df["n_amostras"].max(), df["n_amostras"].mean())
-
-# Montar dataframe com as janelas
-
-df_janelas = montar_dataframe_janelas(df, tamanho_janela=2048)
-print(df_janelas.shape)
-
-#Montar dataframe com features e platar boxplots
-
-df_features = montar_dataframe_features(df_janelas)
-print("Shape:", df_features.shape)
+    print("\nExtração e persistência concluídas com sucesso!")
 
 
-sns.boxplot(data=df_features, x="classe", y="rms")
-plt.title("RMS por classe")
-plt.savefig("results/boxplot_rms.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-sns.boxplot(data=df_features, x="classe", y="curtose")
-plt.title("Curtose por classe")
-plt.savefig("results/boxplot_curtose.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-sns.boxplot(data=df_features, x="classe", y="fator_crista")
-plt.title("Fator de Crista por classe")
-plt.savefig("results/boxplot_fator_crista.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-os.makedirs("data/processed", exist_ok=True)
-df_features.to_csv("data/processed/features.csv", index=False)
-
+if __name__ == "__main__":
+    main()
