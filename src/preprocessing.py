@@ -24,22 +24,38 @@ def carregar_sinal(caminho_arquivo: str) -> np.ndarray:
 
     O nome da variável dentro do .mat muda de arquivo para arquivo
     (ex: 'X097_DE_time', 'X209_DE_time'), pois inclui o ID interno do arquivo.
-    Por isso, em vez de tentar adivinhar o nome, procuramos dinamicamente
-    a chave que contém 'DE_time'.
+    Alguns arquivos (ex: Normal_2) trazem também a série de outro ensaio;
+    nesse caso usamos a de maior ID, que é a do próprio arquivo.
     """
     dados = loadmat(caminho_arquivo)
 
-    chave_de = None
-    for chave in dados.keys():
-        if "DE_time" in chave:
-            chave_de = chave
-            break
+    chaves_de = [c for c in dados.keys() if "DE_time" in c]
 
-    if chave_de is None:
+    if not chaves_de:
         raise ValueError(f"Nenhuma coluna DE_time encontrada em {caminho_arquivo}")
+
+    if len(chaves_de) > 1:
+        chave_de = max(chaves_de, key=lambda c: int(c[1:4]))
+        print(f"[AVISO] {caminho_arquivo} tem várias séries DE_time {chaves_de}; usando {chave_de}")
+    else:
+        chave_de = chaves_de[0]
 
     sinal = dados[chave_de]
     return sinal.flatten()  # (N, 1) -> (N,)
+
+
+def carregar_rpm(caminho_arquivo: str) -> float | None:
+    """
+    Lê a RPM registrada no arquivo .mat (chave contendo 'RPM', ex: 'X097RPM').
+    Retorna None se o arquivo não tiver essa informação.
+    """
+    dados = loadmat(caminho_arquivo)
+
+    for chave in dados.keys():
+        if "RPM" in chave:
+            return float(dados[chave].flatten()[0])
+
+    return None
 
 
 def _separar_letras_numeros(texto: str) -> tuple[str, str]:
@@ -87,6 +103,21 @@ def extrair_rotulo(nome_arquivo: str) -> dict:
         "carga": carga,
     }
 
+def preencher_rpm_ausente(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Preenche a RPM ausente com a mediana da RPM dos demais arquivos de
+    mesma carga. A RPM varia pouco entre arquivos de mesma carga.
+    """
+    df = df.copy()
+    mediana_por_carga = df.groupby("carga")["rpm"].median()
+    ausentes = df["rpm"].isna()
+
+    for _, linha in df[ausentes].iterrows():
+        print(f"[RPM AUSENTE] {linha['arquivo']}: preenchida com "
+              f"{mediana_por_carga[linha['carga']]:.0f} (mediana da carga {linha['carga']})")
+
+    df.loc[ausentes, "rpm"] = df.loc[ausentes, "carga"].map(mediana_por_carga)
+    return df
 
 def montar_dataframe_bruto(pasta_dados: str) -> pd.DataFrame:
     """
@@ -103,6 +134,7 @@ def montar_dataframe_bruto(pasta_dados: str) -> pd.DataFrame:
         caminho_completo = os.path.join(pasta_dados, nome_arquivo)
 
         sinal = carregar_sinal(caminho_completo)
+        rpm = carregar_rpm(caminho_completo)
         rotulo = extrair_rotulo(nome_arquivo)
 
         registros.append({
@@ -111,20 +143,12 @@ def montar_dataframe_bruto(pasta_dados: str) -> pd.DataFrame:
             "severidade": rotulo["severidade"],
             "posicao": rotulo["posicao"],
             "carga": rotulo["carga"],
+            "rpm": rpm,
             "sinal": sinal,
             "n_amostras": len(sinal),
         })
 
     return pd.DataFrame(registros)
-
-
-if __name__ == "__main__":
-    # Execução direta (fora do notebook) para teste rápido via terminal:
-    # python src/preprocessing.py
-    df = montar_dataframe_bruto("data/raw")
-    print(df.drop(columns="sinal"))  # não imprime o array inteiro, só as demais colunas
-    print("\nDistribuição de classes:")
-    print(df["classe"].value_counts())
 
 
 def segmentar_sinal(sinal: np.ndarray, tamanho_janela: int) -> np.ndarray:
@@ -135,9 +159,10 @@ def segmentar_sinal(sinal: np.ndarray, tamanho_janela: int) -> np.ndarray:
     Retorna uma matriz de shape (n_janelas, tamanho_janela).
     """
     n_janelas = len(sinal) // tamanho_janela
-    sinal_util = sinal[: n_janelas * tamanho_janela]  # corta o "resto" fora
+    sinal_util = sinal[: n_janelas * tamanho_janela]
     janelas = sinal_util.reshape(n_janelas, tamanho_janela)
     return janelas
+
 
 def montar_dataframe_janelas(df: pd.DataFrame, tamanho_janela: int) -> pd.DataFrame:
     """
@@ -157,7 +182,17 @@ def montar_dataframe_janelas(df: pd.DataFrame, tamanho_janela: int) -> pd.DataFr
                 "severidade": linha["severidade"],
                 "posicao": linha["posicao"],
                 "carga": linha["carga"],
+                "rpm": linha["rpm"],
                 "janela": janela,
             })
 
     return pd.DataFrame(registros)
+
+
+if __name__ == "__main__":
+    # Execução direta (fora do notebook) para teste rápido via terminal:
+    # python src/preprocessing.py
+    df = montar_dataframe_bruto("data/raw")
+    print(df.drop(columns="sinal"))  # não imprime o array inteiro, só as demais colunas
+    print("\nDistribuição de classes:")
+    print(df["classe"].value_counts())
