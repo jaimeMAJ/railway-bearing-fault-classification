@@ -17,8 +17,25 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
-\usepackage{siunitx}
-\sisetup{output-decimal-marker = {,}}
+% --- Compatibilidade e Definição de Unidades (SI) ---
+\makeatletter
+\providecommand{\SI}[2]{#1\,#2}
+\providecommand{\num}[1]{#1}
+\providecommand{\si}[1]{#1}
+\providecommand{\qty}[2]{#1\,#2}
+\providecommand{\kilo}{\text{k}}
+\providecommand{\milli}{\text{m}}
+\providecommand{\hertz}{\text{Hz}}
+\providecommand{\percent}{\%}
+\providecommand{\meter}{\text{m}}
+\providecommand{\second}{\text{s}}
+\providecommand{\squared}{\textsuperscript{2}}
+\providecommand{\per}{/}
+\providecommand{\degree}{\ensuremath{^\circ}}
+\providecommand{\horsepower}{\text{HP}}
+\providecommand{\watt}{\text{W}}
+\providecommand{\rpm}{\text{rpm}}
+\makeatother
 
 % --- Elementos Visuais e Tabelas ---
 \usepackage{graphicx}
@@ -37,7 +54,7 @@
 \instituicao{Universidade Federal de São João del-Rei \par Curso de Engenharia Mecatrônica}
 \autor{Jaime Malafaia de Arêdes Junior}
 \titulo{Desenvolvimento de Modelo Preditivo Baseado em Inteligência Artificial para Classificação de Falhas em Rolamentos de Rodeiros Ferroviários}
-\orientadora{Profa. Mariana Geny Moreira Vale Cardoso}
+\orientador[Orientadora:]{Profa. Mariana Geny Moreira Vale Cardoso}
 \local{São João del-Rei -- MG}
 \data{2026}
 \tipotrabalho{Trabalho de Conclusão de Curso (Graduação)}

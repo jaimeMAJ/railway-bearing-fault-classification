@@ -1,6 +1,16 @@
-﻿venv/
+venv/
 __pycache__/
 *.pyc
 data/raw/
 .ipynb_checkpoints/
 .agents/
+*.aux
+*.log
+*.bbl
+*.blg
+*.toc
+*.lof
+*.lot
+*.out
+*.fls
+*.fdb_latexmk
