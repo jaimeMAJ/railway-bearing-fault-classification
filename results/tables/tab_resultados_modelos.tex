@@ -1,0 +1,29 @@
+\begin{table}[htbp]
+    \centering
+    \caption{Desempenho comparativo dos modelos no conjunto de teste independente (886 janelas, 12 ensaios)}
+    \label{tab:resultados_modelos}
+    \begin{tabular}{llcccc}
+        \toprule
+        \textbf{Modelo} & \textbf{Condição / Métrica} & \textbf{Precisão} & \textbf{Sensibilidade (\textit{Recall})} & \textbf{F1-Score} & \textbf{Acurácia Global} \\
+        \midrule
+        \multirow{6}{*}{\textbf{Random Forest}} 
+        & Elemento Rolante (B) & \num{0.9942} & \num{0.9718} & \num{0.9829} & \multirow{6}{*}{\textbf{\SI{99.32}{\percent}}} \\
+        & Pista Interna (IR)   & \num{0.9958} & \num{0.9958} & \num{0.9958} & \\
+        & Saudável (Normal)    & \num{0.9875} & \num{1.0000} & \num{0.9937} & \\
+        & Pista Externa (OR)   & \num{0.9958} & \num{1.0000} & \num{0.9979} & \\
+        \cmidrule(lr){2-5}
+        & \textbf{Média Macro} & \num{0.9933} & \num{0.9919} & \textbf{\num{0.9926}} & \\
+        & \textbf{Votação por Ensaio} & --- & --- & --- & \textbf{\SI{100.00}{\percent}} (\num{12}/\num{12}) \\
+        \midrule
+        \multirow{6}{*}{\textbf{SVM (RBF)}} 
+        & Elemento Rolante (B) & \num{1.0000} & \num{0.9548} & \num{0.9769} & \multirow{6}{*}{\textbf{\SI{99.10}{\percent}}} \\
+        & Pista Interna (IR)   & \num{0.9752} & \num{1.0000} & \num{0.9874} & \\
+        & Saudável (Normal)    & \num{1.0000} & \num{1.0000} & \num{1.0000} & \\
+        & Pista Externa (OR)   & \num{0.9916} & \num{1.0000} & \num{0.9958} & \\
+        \cmidrule(lr){2-5}
+        & \textbf{Média Macro} & \num{0.9917} & \num{0.9887} & \textbf{\num{0.9900}} & \\
+        & \textbf{Votação por Ensaio} & --- & --- & --- & \textbf{\SI{100.00}{\percent}} (\num{12}/\num{12}) \\
+        \bottomrule
+    \end{tabular}
+    \legend{Fonte: Elaborado pelo autor (2026).}
+\end{table}

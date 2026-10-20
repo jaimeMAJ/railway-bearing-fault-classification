@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+    \centering
+    \caption{Estrutura de classes, severidades e distribuição de amostras do dataset CWRU (12 kHz)}
+    \label{tab:dataset_classes}
+    \begin{tabular}{lllcc}
+        \toprule
+        \textbf{Classe} & \textbf{Descrição Física} & \textbf{Severidades (Diâmetro)} & \textbf{Ensaios} & \textbf{Janelas ($N=2048$)} \\
+        \midrule
+        \textbf{B} & Elemento Rolante & \SI{0.007}{in}, \SI{0.014}{in}, \SI{0.021}{in} & \num{12} & \num{708} \\
+        \textbf{IR} & Pista Interna & \SI{0.007}{in}, \SI{0.014}{in}, \SI{0.021}{in} & \num{12} & \num{709} \\
+        \textbf{Normal} & Condição Saudável & N/A & \num{4} & \num{828} \\
+        \textbf{OR} & Pista Externa (@6:00) & \SI{0.007}{in}, \SI{0.014}{in}, \SI{0.021}{in} & \num{12} & \num{708} \\
+        \midrule
+        \textbf{Total} & \textbf{4 Condições Físicas} & \textbf{3 Níveis + Baseline} & \textbf{\num{40}} & \textbf{\num{2953}} \\
+        \bottomrule
+    \end{tabular}
+    \legend{Fonte: Elaborado pelo autor com base nos dados da Case Western Reserve University (2026).}
+\end{table}

@@ -1,0 +1,92 @@
+\documentclass[
+    12pt,
+    openright,
+    oneside,
+    a4paper,
+    english,
+    brazil
+]{abntex2}
+
+% --- Pacotes Fundamentais ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% --- Matemática e Unidades ---
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{siunitx}
+\sisetup{output-decimal-marker = {,}}
+
+% --- Elementos Visuais e Tabelas ---
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{subcaption}
+
+% --- Citações Padrão ABNT ---
+\usepackage[alf,abnt-emphasize=bf,abnt-etal-list=0]{abntex2cite}
+
+% --- Caminho para Imagens ---
+\graphicspath{{../results/figures/}}
+
+% --- Informações Institucionais e Metadados ---
+\instituicao{Universidade Federal de São João del-Rei \par Curso de Engenharia Mecatrônica}
+\autor{Jaime Malafaia de Arêdes Junior}
+\titulo{Desenvolvimento de Modelo Preditivo Baseado em Inteligência Artificial para Classificação de Falhas em Rolamentos de Rodeiros Ferroviários}
+\orientadora{Profa. Mariana Geny Moreira Vale Cardoso}
+\local{São João del-Rei -- MG}
+\data{2026}
+\tipotrabalho{Trabalho de Conclusão de Curso (Graduação)}
+\preambulo{Trabalho de Conclusão de Curso apresentado à Coordenadoria do Curso de Engenharia Mecatrônica da Universidade Federal de São João del-Rei como requisito parcial para obtenção do título de Bacharel em Engenharia Mecatrônica.}
+
+% --- Configurações de Aparência do PDF ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    bookmarksdepth=4
+}
+
+\begin{document}
+
+\selectlanguage{brazil}
+\frenchspacing
+
+% --- Elementos Pré-Textuais ---
+\imprimircapa
+\imprimirfolhaderosto*
+
+\include{pre_textuais/resumo}
+
+\pdfbookmark[0]{\listfigurename}{lof}
+\listoffigures*
+\cleardoublepage
+
+\pdfbookmark[0]{\listtablename}{lot}
+\listoftables*
+\cleardoublepage
+
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage
+
+% --- Elementos Textuais ---
+\textual
+
+\include{capitulos/01_introducao}
+\include{capitulos/02_revisao}
+\include{capitulos/03_metodologia}
+\include{capitulos/04_resultados}
+\include{capitulos/05_conclusao}
+
+% --- Elementos Pós-Textuais ---
+\postextual
+
+\bibliography{referencias}
+
+\end{document}

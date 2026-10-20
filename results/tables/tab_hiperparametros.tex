@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+    \centering
+    \caption{Espaço de busca da validação cruzada e hiperparâmetros finais dos modelos}
+    \label{tab:hiperparametros}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Classificador} & \textbf{Espaço de Otimização (Grid Search)} & \textbf{Configuração Adotada} \\
+        \midrule
+        \multirow{4}{*}{\textbf{Random Forest}} 
+        & Número de Árvores (\textit{n\_estimators}): $[50, 100, 200]$ & \textit{n\_estimators} = \num{100} \\
+        & Critério de Divisão (\textit{criterion}): $[\text{Gini}, \text{Entropia}]$ & \textit{criterion} = Gini \\
+        & Profundidade Máxima (\textit{max\_depth}): $[\text{None}, 10, 20]$ & \textit{max\_depth} = None \\
+        & Amostras Mínimas por Divisão: $[2, 5, 10]$ & \textit{min\_samples\_split} = \num{2} \\
+        \midrule
+        \multirow{4}{*}{\textbf{SVM}} 
+        & Pré-processamento: $[\text{StandardScaler}, \text{MinMaxScaler}]$ & Padronização (\textit{StandardScaler}) \\
+        & Função de \textit{Kernel}: $[\text{Linear}, \text{RBF}, \text{Polinomial}]$ & \textit{Kernel} Radial Base (RBF) \\
+        & Parâmetro de Regularização ($C$): $[0.1, 1.0, 10.0, 100.0]$ & $C = 1.0$ \\
+        & Coeficiente do \textit{Kernel} ($\gamma$): $[\text{scale}, \text{auto}, 0.01, 0.1]$ & $\gamma = \text{scale} \approx 0.0625$ \\
+        \bottomrule
+    \end{tabular}
+    \legend{Fonte: Elaborado pelo autor (2026).}
+\end{table}
