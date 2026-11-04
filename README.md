@@ -45,7 +45,6 @@ notebook_python/
 ├── 02_train_models.py        # Treino, validação cruzada agrupada e avaliação final
 ├── 03_plot_spectra.py        # Geração de espectros FFT e Envelope para a monografia
 ├── download_cwru.py          # Script de download automatizado do dataset CWRU
-├── especificaces_do_projeto_tcc.md # Especificações completas e cronograma do TCC
 ├── requirements.txt          # Dependências do projeto (incluindo pyarrow)
 └── README.md
 ```

@@ -1,9 +1,41 @@
+# =====================================================================
+# Python / Ambiente de Desenvolvimento
+# =====================================================================
 venv/
 __pycache__/
 *.pyc
-data/raw/
 .ipynb_checkpoints/
+
+# =====================================================================
+# Dados Brutos
+# =====================================================================
+data/raw/
+
+# =====================================================================
+# Configurações de Agentes de IA
+# =====================================================================
 .agents/
+
+# =====================================================================
+# Especificações e Instruções do Projeto (.md)
+# =====================================================================
+especificaces_do_projeto_tcc.md
+instrucoes_monografia_latex.md
+*especifica*.md
+*instrucoes*.md
+
+# =====================================================================
+# Produção de Texto e Artefatos da Monografia (LaTeX / abnTeX2)
+# =====================================================================
+monografia/
+src/export_latex_artifacts.py
+results/tables/
+results/figures/fig_*
+
+# Formatos de Documentos e Compilação LaTeX
+*.tex
+*.pdf
+*.bib
 *.aux
 *.log
 *.bbl
@@ -14,3 +46,4 @@ data/raw/
 *.out
 *.fls
 *.fdb_latexmk
+*.synctex.gz
